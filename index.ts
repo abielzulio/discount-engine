@@ -1,42 +1,10 @@
-interface Rule {
-  type: RuleType
-  operator: RuleOperator
-  values?: number
-  product_id?: string
-  supplier_id?: string
-  quantity?: number
-}
-
-type RuleOperator = "eq" | "gte" | "lte" | "in"
-type RuleType =
-  | "product_quantity"
-  | "supplier"
-  | "total_quantity"
-  | "cart_value"
-
-type ActionType = "percentage_discount" | "flat_discount" | "free_item"
-
-interface Action {
-  type: ActionType
-  value?: number
-  product_id?: string
-  quantity?: number
-}
-
-interface Discount {
-  id: string | number
-  code: string
-  name: string
-  rules: Rule[]
-  action: Action
-}
-
-interface CartItem {
-  id: string
-  supplier_id: string
-  quantity: number
-  price: number
-}
+import type {
+  Action,
+  CartItem,
+  Discount,
+  Rule,
+  RuleOperator,
+} from "./index.type"
 
 class DiscountEngine<T extends CartItem> {
   private cart: T[]
