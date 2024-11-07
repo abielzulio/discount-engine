@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import type { CartItem, Discount } from "./index.type"
 import { DiscountEngine } from "."
 
-describe("Buy 3 get 1", () => {
+describe("Buy N Get M Free", () => {
   const discounts: Discount[] = [
     {
       id: 1,
@@ -18,41 +18,30 @@ describe("Buy 3 get 1", () => {
     },
   ]
 
-  test("Success to get 1 free item if quantity exact 3", () => {
+  test("Success to buy 3 get 1", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 3, price: 50 }],
       discounts,
     }
 
     const discountEngine = new DiscountEngine(order.cart)
-    const actions = discountEngine.applyDiscounts(order.discounts)
-    const act = order.discounts.map((x) => x.action)
+    const discountActs = discountEngine.applyDiscounts(order.discounts)
 
-    expect(actions).toEqual(act)
+    expect(discountActs).toEqual([
+      { type: "free_item", product_id: "jeans", quantity: 1 },
+    ])
   }),
-    test("Success to get 1 free item if quantity have more than 3", () => {
+    test("Fails to buy 3 get 1 if item less than 3", () => {
       const order: { cart: CartItem[]; discounts: Discount[] } = {
         cart: [
-          { id: "jeans", supplier_id: "supplierA", quantity: 4, price: 50 },
+          { id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 },
         ],
         discounts,
       }
 
       const discountEngine = new DiscountEngine(order.cart)
       const actions = discountEngine.applyDiscounts(order.discounts)
-      const act = order.discounts.map((x) => x.action)
 
-      expect(actions).toEqual(act)
+      expect(actions).toBeArrayOfSize(0)
     })
-  test("Fails to get 1 free item if quantity less than 3", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
-      cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 }],
-      discounts,
-    }
-
-    const discountEngine = new DiscountEngine(order.cart)
-    const actions = discountEngine.applyDiscounts(order.discounts)
-
-    expect(actions).toBeArrayOfSize(0)
-  })
 })
