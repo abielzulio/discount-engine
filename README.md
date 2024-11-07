@@ -5,7 +5,8 @@ Discount engine is a service to apply discounts dynamically based on configurabl
 ## Example usage
 
 ```typescript
-const discounts = [
+/** CASE 1: Multiple discount **/
+const multipleDiscounts = [
   {
     id: "disc_da21c",
     code: "BUY3GET1",
@@ -19,44 +20,105 @@ const discounts = [
     action: { type: "free_item", product_id: "jeans", quantity: 1 },
   },
   {
-    id: "disc_da21c",
-    code: "BUY3GET1",
+    id: "disc_3123ca",
+    code: "DISCSUPB",
     rules: [
       {
         type: "supplier_quantity",
         operator: "gte",
+        quantity: 5,
         supplier_id: "supplierB",
-        quantity: 3,
       },
     ],
     action: { type: "flat_discount", value: 5 },
   },
 ]
 
-const validOrder = {
+const order1 = {
   cart: [
     { id: "jeans", supplier_id: "supplierB", quantity: 5, price: 50 },
     { id: "shirt", supplier_id: "supplierA", quantity: 2, price: 80 },
   ],
 }
 
-const engine = new DiscountEngine(validOrder.cart)
-const actions = engine.applyDiscounts(discounts)
+const engine = new DiscountEngine(order1.cart)
+const actions = engine.applyDiscounts(multipleDiscounts)
 
 console.log(actions) // [{ type: "free_item", product_id: "jeans", quantity: 1 }, { type: "flat_discount", value: 5 }]
 
-/** Check if the discount is applicable */
-const invalidOrder = {
+/** CASE 2: Discount is not applicable **/
+const order2 = {
   cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 1, price: 50 }],
 }
 
-const engine2 = new DiscountEngine(invalidOrder.cart)
-const actions2 = engine2.applyDiscounts(discounts)
+const engine2 = new DiscountEngine(order2.cart)
+const actions2 = engine2.applyDiscounts(multipleDiscounts)
 
 console.log(actions2) // []
+
+/** CASE 3: Single discount with multiple rules **/
+const singleDiscountWithMultipleRules = [
+  {
+    id: "disc_da21c",
+    code: "BUY3GET1",
+    rules: [
+      {
+        type: "cart_value",
+        operator: "gt",
+        cart_value: 200,
+      },
+      {
+        type: "product_quantity",
+        operator: "gt",
+        product_id: "jeans",
+        quantity: 3,
+      },
+    ],
+    action: { type: "flat_discount", value: 10 },
+  },
+]
+
+const order3 = {
+  cart: [
+    { id: "jeans", supplier_id: "supplierB", quantity: 4, price: 30 },
+    { id: "tshirt", supplier_id: "supplierA", quantity: 6, price: 15 },
+  ],
+}
+
+const engine3 = new DiscountEngine(order3.cart)
+const actions3 = engine.applyDiscounts(singleDiscountWithMultipleRules)
+
+console.log(actions3) // [{ type: "flat_discount", value: 10 }]
 ```
 
-## Discount rule type definition
+## Discount schema
+
+### Base
+
+```typescript
+export interface Discount {
+  id: string | number
+  code: string
+  name?: string
+  /** List of rules to apply the discount */
+  rules: Rule[]
+  /** Action to apply the discount */
+  action: Action
+}
+```
+
+### Action
+
+```typescript
+export interface Action {
+  type: "percentage_discount" | "flat_discount" | "free_item"
+  value?: number
+  product_id?: string
+  quantity?: number
+}
+```
+
+### Rule
 
 ```typescript
 export interface Rule {
@@ -142,22 +204,3 @@ A discount rule to apply a discount based on the total value of the cart.
 ```
 
 > Apply a discount if the total value of the cart is greater than to 100.
-
-### How to use
-
-Given this set of rules, the discount engine should be able to apply the discount to the cart based on the rules.
-
-```typescript
-{
-  id: 1,
-  code: "BUY3DISC",
-  rules: [
-    {
-      type: "total_quantity",
-      operator: "gte",
-      quantity: 3,
-    },
-  ],
-  action: { type: "percentage_discount", value: 5 },
-}
-```
