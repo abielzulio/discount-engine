@@ -10,7 +10,7 @@ export interface Rule {
 export type RuleOperator = "eq" | "gte" | "lte" | "in"
 export type RuleType =
   | "product_quantity"
-  | "supplier"
+  | "supplier_quantity"
   | "total_quantity"
   | "cart_value"
 
@@ -26,7 +26,7 @@ export interface Action {
 export interface Discount {
   id: string | number
   code: string
-  name: string
+  name?: string
   rules: Rule[]
   action: Action
 }

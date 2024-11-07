@@ -6,18 +6,22 @@ import type {
   RuleOperator,
 } from "./index.type"
 
-class DiscountEngine<T extends CartItem> {
+export class DiscountEngine<T extends CartItem> {
   private cart: T[]
   constructor(cart: T[]) {
     this.cart = cart
   }
 
-  applyDiscounts(discounts: Discount[]): void {
-    discounts.forEach((discount) => {
-      if (this.evaluateRuleGroup(discount.rules)) {
-        this.applyAction(discount.action)
-      }
-    })
+  applyDiscounts(discounts: Discount[]): Action[] {
+    const disc = discounts
+      .map((d) => {
+        if (this.evaluateRuleGroup(d.rules)) {
+          return this.applyAction(d.action)
+        }
+        return null
+      })
+      .filter((x) => !!x)
+    return disc
   }
 
   private evaluateRuleGroup(ruleGroup: Rule[]): boolean {
@@ -26,6 +30,7 @@ class DiscountEngine<T extends CartItem> {
 
   private checkRule(condition: Rule): boolean {
     switch (condition.type) {
+      /** Product-based quantity*/
       case "product_quantity":
         if (!condition.product_id)
           throw new Error("'product_id' rule is undefined")
@@ -35,13 +40,11 @@ class DiscountEngine<T extends CartItem> {
           condition.product_id,
           condition.quantity
         )
-      case "supplier":
-        if (!condition.supplier_id)
-          throw new Error("'supplier_rule' is undefined")
-        return this.checkSupplier(condition.operator, condition.supplier_id)
+      /** Total quantity */
       case "total_quantity":
         if (!condition.quantity) throw new Error("'quantity' is undefined")
         return this.checkTotalQuantity(condition.operator, condition.quantity)
+      /** Cart value */
       case "cart_value":
         if (!condition.values) throw new Error("'values' is undefined")
         return this.checkCartValue(condition.operator, condition.values)
@@ -110,65 +113,14 @@ class DiscountEngine<T extends CartItem> {
     }
   }
 
-  private applyAction(action: Action): void {
+  private applyAction(action: Action): Action {
     switch (action.type) {
       case "percentage_discount":
-        console.log(`Applying ${action.value}% discount`)
-        break
+        return action
       case "flat_discount":
-        console.log(`Applying flat discount of ${action.value}`)
-        break
+        return action
       case "free_item":
-        console.log(
-          `Adding free item: ${action.product_id}, Quantity: ${action.quantity}`
-        )
-        break
+        return action
     }
   }
 }
-
-const main = () => {
-  const order: { cart: CartItem[]; discounts: Discount[] } = {
-    cart: [
-      { id: "tshirt", supplier_id: "supplierA", quantity: 1, price: 20 },
-      { id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 },
-    ],
-    discounts: [
-      {
-        id: 1,
-        code: "COMBO",
-        name: "T-shirt and Jeans Combo Discount",
-        rules: [
-          {
-            type: "product_quantity",
-            operator: "eq",
-            product_id: "tshirt",
-            quantity: 1,
-          },
-          {
-            type: "product_quantity",
-            operator: "eq",
-            product_id: "jeans",
-            quantity: 2,
-          },
-        ],
-        action: { type: "percentage_discount", value: 10 },
-      },
-      {
-        id: 1,
-        code: "SAVE",
-        name: "Buy More, Save More on Supplier A",
-        rules: [
-          { type: "supplier", operator: "eq", supplier_id: "supplierA" },
-          { type: "total_quantity", operator: "gte", quantity: 3 },
-        ],
-        action: { type: "flat_discount", value: 15 },
-      },
-    ],
-  }
-
-  const discountEngine = new DiscountEngine(order.cart)
-  discountEngine.applyDiscounts(order.discounts)
-}
-
-main()
