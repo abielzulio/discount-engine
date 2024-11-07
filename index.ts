@@ -79,6 +79,9 @@ export class DiscountEngine<T extends CartItem> {
       (acc, item) => acc + item.quantity,
       0
     )
+
+    /** TODO: Handle multiplication */
+    /** Buy 3 Get 1 = Buy 6 Get 2 = etc.. */
     return this.applyOperator(totalQuantity, operator, requiredQuantity)
   }
 
