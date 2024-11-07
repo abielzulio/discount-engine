@@ -241,3 +241,18 @@ A discount rule to apply a discount based on the total value of the cart.
 ```
 
 > Apply a discount if the total value of the cart is greater than to 100.
+
+### How to use this repo?
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/abielzulio/discount-engine discount-engine
+```
+
+2. Run the tests:
+
+```bash
+cd discount-engine
+bun test
+```
