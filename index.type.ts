@@ -1,7 +1,7 @@
 export interface Rule {
   type: RuleType
   operator: RuleOperator
-  values?: number
+  cart_value?: number
   product_id?: string
   supplier_id?: string
   quantity?: number
@@ -9,7 +9,7 @@ export interface Rule {
   multiplierRatio?: number
 }
 
-export type RuleOperator = "eq" | "gte" | "lte" | "in" | "gt"
+export type RuleOperator = "eq" | "gte" | "gt"
 export type RuleType =
   | "product_quantity"
   | "supplier_quantity"

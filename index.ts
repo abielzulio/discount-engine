@@ -100,8 +100,9 @@ export class DiscountEngine<T extends CartItem> {
         return this.checkTotalQuantity(condition.operator, condition.quantity)
       /** Cart value */
       case "cart_value":
-        if (!condition.values) throw new Error("'values' is not defined")
-        return this.checkCartValue(condition.operator, condition.values)
+        if (!condition.cart_value)
+          throw new Error("'cart_value' is not defined")
+        return this.checkCartValue(condition.operator, condition.cart_value)
       default:
         return false
     }
@@ -164,12 +165,6 @@ export class DiscountEngine<T extends CartItem> {
         return cartValue > conditionValue
       case "gte":
         return cartValue >= conditionValue
-      case "lte":
-        return cartValue <= conditionValue
-      case "in":
-        return Array.isArray(conditionValue)
-          ? conditionValue.includes(cartValue)
-          : false
       default:
         return false
     }
