@@ -2,6 +2,60 @@
 
 Discount engine is a service to apply discounts dynamically based on configurable rules related to quantity, suppliers, and product combinations.
 
+## Example usage
+
+```typescript
+const discounts = [
+  {
+    id: "disc_da21c",
+    code: "BUY3GET1",
+    rules: [
+      {
+        type: "total_quantity",
+        operator: "gte",
+        quantity: 3,
+      },
+    ],
+    action: { type: "free_item", product_id: "jeans", quantity: 1 },
+  },
+  {
+    id: "disc_da21c",
+    code: "BUY3GET1",
+    rules: [
+      {
+        type: "supplier_quantity",
+        operator: "gte",
+        supplier_id: "supplierB",
+        quantity: 3,
+      },
+    ],
+    action: { type: "flat_discount", value: 5 },
+  },
+]
+
+const validOrder = {
+  cart: [
+    { id: "jeans", supplier_id: "supplierB", quantity: 5, price: 50 },
+    { id: "shirt", supplier_id: "supplierA", quantity: 2, price: 80 },
+  ],
+}
+
+const engine = new DiscountEngine(validOrder.cart)
+const actions = engine.applyDiscounts(discounts)
+
+console.log(actions) // [{ type: "free_item", product_id: "jeans", quantity: 1 }, { type: "flat_discount", value: 5 }]
+
+/** Check if the discount is applicable */
+const invalidOrder = {
+  cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 1, price: 50 }],
+}
+
+const engine2 = new DiscountEngine(invalidOrder.cart)
+const actions2 = engine2.applyDiscounts(discounts)
+
+console.log(actions2) // []
+```
+
 ## Discount rule type definition
 
 ```typescript
@@ -88,3 +142,22 @@ A discount rule to apply a discount based on the total value of the cart.
 ```
 
 > Apply a discount if the total value of the cart is greater than to 100.
+
+### How to use
+
+Given this set of rules, the discount engine should be able to apply the discount to the cart based on the rules.
+
+```typescript
+{
+  id: 1,
+  code: "BUY3DISC",
+  rules: [
+    {
+      type: "total_quantity",
+      operator: "gte",
+      quantity: 3,
+    },
+  ],
+  action: { type: "percentage_discount", value: 5 },
+}
+```
