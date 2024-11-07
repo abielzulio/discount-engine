@@ -57,38 +57,75 @@ const actions2 = engine2.applyDiscounts(multipleDiscounts)
 console.log(actions2) // []
 
 /** CASE 3: Single discount with multiple rules **/
-const singleDiscountWithMultipleRules = [
-  {
-    id: "disc_da21c",
-    code: "BUY3GET1",
-    rules: [
-      {
-        type: "cart_value",
-        operator: "gt",
-        cart_value: 200,
-      },
-      {
-        type: "product_quantity",
-        operator: "gt",
-        product_id: "jeans",
-        quantity: 3,
-      },
-    ],
-    action: { type: "flat_discount", value: 10 },
-  },
-]
-
 const order3 = {
   cart: [
     { id: "jeans", supplier_id: "supplierB", quantity: 4, price: 30 },
     { id: "tshirt", supplier_id: "supplierA", quantity: 6, price: 15 },
   ],
+  discounts: [
+    {
+      id: "disc_da21c",
+      code: "BUY3GET1",
+      rules: [
+        {
+          type: "cart_value",
+          operator: "gt",
+          cart_value: 200,
+        },
+        {
+          type: "product_quantity",
+          operator: "gt",
+          product_id: "jeans",
+          quantity: 3,
+        },
+      ],
+      action: { type: "flat_discount", value: 10 },
+    },
+  ],
 }
 
 const engine3 = new DiscountEngine(order3.cart)
-const actions3 = engine.applyDiscounts(singleDiscountWithMultipleRules)
+const actions3 = engine3.applyDiscounts(order3.discount)
 
 console.log(actions3) // [{ type: "flat_discount", value: 10 }]
+
+/** CASE 4: Discount with multiplier **/
+/** e.g: Buy X items and Y items together Z times and get a discount on the combination. */
+
+const order4 = {
+  cart: [
+    { id: "jeans", supplier_id: "supplierA", quantity: 4, price: 50 },
+    { id: "shirt", supplier_id: "supplierA", quantity: 4, price: 50 },
+  ],
+  discounts: [
+    {
+      id: 1,
+      code: "COMBDISC",
+      rules: [
+        {
+          type: "product_quantity",
+          operator: "gte",
+          quantity: 2,
+          product_id: "jeans",
+          multiply: true,
+        },
+        {
+          type: "product_quantity",
+          operator: "gte",
+          quantity: 2,
+          product_id: "shirt",
+          multiply: true,
+        },
+      ],
+      action: { type: "flat_discount", value: 5 },
+    },
+  ],
+}
+
+const engine4 = new DiscountEngine(order4.cart)
+const action4 = engine4.applyDiscounts(order4.discounts)
+
+console.log(action4) // [{ type: "flat_discount", value: 5 }]
 ```
 
 ## Discount schema
