@@ -31,39 +31,6 @@ interface Discount {
   action: Action
 }
 
-const discounts: Discount[] = [
-  {
-    id: 1,
-    code: "COMBO",
-    name: "T-shirt and Jeans Combo Discount",
-    rules: [
-      {
-        type: "product_quantity",
-        operator: "eq",
-        product_id: "tshirt",
-        quantity: 1,
-      },
-      {
-        type: "product_quantity",
-        operator: "eq",
-        product_id: "jeans",
-        quantity: 2,
-      },
-    ],
-    action: { type: "percentage_discount", value: 10 },
-  },
-  {
-    id: 1,
-    code: "SAVE",
-    name: "Buy More, Save More on Supplier A",
-    rules: [
-      { type: "supplier", operator: "eq", supplier_id: "supplierA" },
-      { type: "total_quantity", operator: "gte", quantity: 3 },
-    ],
-    action: { type: "flat_discount", value: 15 },
-  },
-]
-
 interface CartItem {
   id: string
   supplier_id: string
@@ -193,13 +160,47 @@ class DiscountEngine<T extends CartItem> {
 }
 
 const main = () => {
-  const cart: CartItem[] = [
-    { id: "tshirt", supplier_id: "supplierA", quantity: 1, price: 20 },
-    { id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 },
-  ]
+  const order: { cart: CartItem[]; discounts: Discount[] } = {
+    cart: [
+      { id: "tshirt", supplier_id: "supplierA", quantity: 1, price: 20 },
+      { id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 },
+    ],
+    discounts: [
+      {
+        id: 1,
+        code: "COMBO",
+        name: "T-shirt and Jeans Combo Discount",
+        rules: [
+          {
+            type: "product_quantity",
+            operator: "eq",
+            product_id: "tshirt",
+            quantity: 1,
+          },
+          {
+            type: "product_quantity",
+            operator: "eq",
+            product_id: "jeans",
+            quantity: 2,
+          },
+        ],
+        action: { type: "percentage_discount", value: 10 },
+      },
+      {
+        id: 1,
+        code: "SAVE",
+        name: "Buy More, Save More on Supplier A",
+        rules: [
+          { type: "supplier", operator: "eq", supplier_id: "supplierA" },
+          { type: "total_quantity", operator: "gte", quantity: 3 },
+        ],
+        action: { type: "flat_discount", value: 15 },
+      },
+    ],
+  }
 
-  const discountEngine = new DiscountEngine(cart)
-  discountEngine.applyDiscounts(discounts)
+  const discountEngine = new DiscountEngine(order.cart)
+  discountEngine.applyDiscounts(order.discounts)
 }
 
 main()
