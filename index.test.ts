@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import type { CartItem, Discount } from "./index.type"
 import { DiscountEngine } from "."
 
-describe("Buy N Get M Free", () => {
+describe("Buy N Get M Free Discounts", () => {
   const discounts: Discount[] = [
     {
       id: 1,
@@ -45,7 +45,7 @@ describe("Buy N Get M Free", () => {
   })
 })
 
-describe("Buy N Get Discount", () => {
+describe("Buy N Get Discounts", () => {
   const discounts: Discount[] = [
     {
       id: 1,
@@ -61,7 +61,7 @@ describe("Buy N Get Discount", () => {
     },
   ]
 
-  test("Success to get a 5% disc if buy 3 items", () => {
+  test("Success to get a 5% off if buy 3 items", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 3, price: 50 }],
       discounts,
@@ -73,7 +73,7 @@ describe("Buy N Get Discount", () => {
     expect(discountActs).toEqual([{ type: "percentage_discount", value: 5 }])
   })
 
-  test("Fails to get a 5% disc if buy less than 3 items", () => {
+  test("Fails to get a 5% off if buy less than 3 items", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 }],
       discounts,
@@ -103,7 +103,7 @@ describe("Supplier-Based Quantity Discounts", () => {
     },
   ]
 
-  test("Success to get a 20% disc if buy more than 10 items from supplier A", () => {
+  test("Success to get a 20% off if buy more than 10 items from supplier A", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [
         { id: "jeans", supplier_id: "supplierA", quantity: 11, price: 50 },
@@ -117,7 +117,7 @@ describe("Supplier-Based Quantity Discounts", () => {
     expect(discountActs).toEqual([{ type: "percentage_discount", value: 20 }])
   })
 
-  test("Fails to get a 20% disc if buy exact 10 items from supplier A", () => {
+  test("Fails to get a 20% off if buy exact 10 items from supplier A", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [
         { id: "jeans", supplier_id: "supplierA", quantity: 10, price: 50 },
@@ -131,7 +131,7 @@ describe("Supplier-Based Quantity Discounts", () => {
     expect(discountActs).toEqual([])
   })
 
-  test("Fails to get a 20% disc if buy less than 10 from supplier A", () => {
+  test("Fails to get a 20% off if buy less than 10 from supplier A", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 8, price: 50 }],
       discounts,
@@ -143,7 +143,7 @@ describe("Supplier-Based Quantity Discounts", () => {
     expect(discountActs).toEqual([])
   })
 
-  test("Fails to get a 20% disc if buy more than 10 from supplier B", () => {
+  test("Fails to get a 20% off if buy more than 10 from supplier B", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [
         { id: "jeans", supplier_id: "supplierB", quantity: 11, price: 50 },
