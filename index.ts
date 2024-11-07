@@ -33,8 +33,9 @@ export class DiscountEngine<T extends CartItem> {
       /** Product-based quantity*/
       case "product_quantity":
         if (!condition.product_id)
-          throw new Error("'product_id' rule is undefined")
-        if (!condition.quantity) throw new Error("'quantity' rule is undefined")
+          throw new Error("'product_id' rule is not defined")
+        if (!condition.quantity)
+          throw new Error("'quantity' rule is not defined")
         return this.checkProductQuantity(
           condition.operator,
           condition.product_id,
@@ -42,11 +43,11 @@ export class DiscountEngine<T extends CartItem> {
         )
       /** Total quantity */
       case "total_quantity":
-        if (!condition.quantity) throw new Error("'quantity' is undefined")
+        if (!condition.quantity) throw new Error("'quantity' is not defined")
         return this.checkTotalQuantity(condition.operator, condition.quantity)
       /** Cart value */
       case "cart_value":
-        if (!condition.values) throw new Error("'values' is undefined")
+        if (!condition.values) throw new Error("'values' is not defined")
         return this.checkCartValue(condition.operator, condition.values)
       default:
         return false
