@@ -7,7 +7,7 @@ export interface Rule {
   quantity?: number
 }
 
-export type RuleOperator = "eq" | "gte" | "lte" | "in"
+export type RuleOperator = "eq" | "gte" | "lte" | "in" | "gt"
 export type RuleType =
   | "product_quantity"
   | "supplier_quantity"

@@ -41,6 +41,17 @@ export class DiscountEngine<T extends CartItem> {
           condition.product_id,
           condition.quantity
         )
+      /** Supplier-based quantity */
+      case "supplier_quantity":
+        if (!condition.supplier_id)
+          throw new Error("'supplier_id' rule is not defined")
+        if (!condition.quantity)
+          throw new Error("'quantity' rule is not defined")
+        return this.checkSupplierQuantity(
+          condition.operator,
+          condition.supplier_id,
+          condition.quantity
+        )
       /** Total quantity */
       case "total_quantity":
         if (!condition.quantity) throw new Error("'quantity' is not defined")
@@ -54,6 +65,18 @@ export class DiscountEngine<T extends CartItem> {
     }
   }
 
+  private checkSupplierQuantity(
+    operator: RuleOperator,
+    supplierId: string,
+    requiredQuantity: number
+  ): boolean {
+    const cartItems = this.cart.filter(
+      (item) => item.supplier_id === supplierId
+    )
+    const cartQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0)
+    return this.applyOperator(cartQuantity, operator, requiredQuantity)
+  }
+
   private checkProductQuantity(
     operator: RuleOperator,
     productId: string,
@@ -62,13 +85,6 @@ export class DiscountEngine<T extends CartItem> {
     const cartItem = this.cart.find((item) => item.id === productId)
     const cartQuantity = cartItem ? cartItem.quantity : 0
     return this.applyOperator(cartQuantity, operator, requiredQuantity)
-  }
-
-  private checkSupplier(operator: RuleOperator, supplierId: string): boolean {
-    const hasSupplierItems = this.cart.some(
-      (item) => item.supplier_id === supplierId
-    )
-    return operator === "eq" ? hasSupplierItems : false
   }
 
   private checkTotalQuantity(
@@ -104,6 +120,8 @@ export class DiscountEngine<T extends CartItem> {
     switch (operator) {
       case "eq":
         return cartValue === conditionValue
+      case "gt":
+        return cartValue > conditionValue
       case "gte":
         return cartValue >= conditionValue
       case "lte":
