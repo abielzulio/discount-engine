@@ -159,27 +159,25 @@ describe("Supplier-Based Quantity Discounts", () => {
 })
 
 describe("Combination Discounts", () => {
-  const discounts: Discount[] = [
-    {
-      id: 1,
-      code: "COMBDISC",
-      rules: [
-        {
-          type: "product_quantity",
-          operator: "gte",
-          quantity: 2,
-          product_id: "jeans",
-          multiply: true,
-        },
-      ],
-      action: { type: "flat_discount", value: 5 },
-    },
-  ]
-
   test("Success to get a 10 off if buy a product with 4 items", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 4, price: 50 }],
-      discounts,
+      discounts: [
+        {
+          id: 1,
+          code: "COMBDISC",
+          rules: [
+            {
+              type: "product_quantity",
+              operator: "gte",
+              quantity: 2,
+              product_id: "jeans",
+              multiply: true,
+            },
+          ],
+          action: { type: "flat_discount", value: 5 },
+        },
+      ],
     }
 
     const discountEngine = new DiscountEngine(order.cart)
@@ -188,7 +186,7 @@ describe("Combination Discounts", () => {
     expect(discountActs).toEqual([{ type: "flat_discount", value: 10 }])
   })
 
-  test("Success to get a 10 off if buy 2 products with 4 items per product", () => {
+  test("Success to get a 10 off if buy 2 products with 4 items per product (2 times)", () => {
     const order: { cart: CartItem[]; discounts: Discount[] } = {
       cart: [
         { id: "jeans", supplier_id: "supplierA", quantity: 4, price: 50 },

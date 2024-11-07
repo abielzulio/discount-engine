@@ -37,9 +37,9 @@ export class DiscountEngine<T extends CartItem> {
         )
     )
 
-    if (!multiplicativeRule || !multiplicativeRule.quantity) {
-      return 1
-    }
+    if (!multiplicativeRule || !multiplicativeRule.quantity) return 1
+
+    const ratio = multiplicativeRule.multiplierRatio || 1
 
     let actualQuantity: number
     switch (multiplicativeRule.type) {
@@ -65,8 +65,9 @@ export class DiscountEngine<T extends CartItem> {
       default:
         return 1
     }
+    const base = Math.floor(actualQuantity / multiplicativeRule.quantity)
 
-    return Math.floor(actualQuantity / multiplicativeRule.quantity)
+    return Math.floor(base / ratio)
   }
 
   private checkRule(condition: Rule): boolean {
