@@ -13,19 +13,60 @@ export class DiscountEngine<T extends CartItem> {
   }
 
   applyDiscounts(discounts: Discount[]): Action[] {
-    const disc = discounts
+    return discounts
       .map((d) => {
         if (this.evaluateRuleGroup(d.rules)) {
-          return this.applyAction(d.action)
+          const multiplier = this.calculateMultiplier(d.rules)
+          return this.applyAction(d.action, multiplier)
         }
         return null
       })
       .filter((x) => !!x)
-    return disc
   }
 
   private evaluateRuleGroup(ruleGroup: Rule[]): boolean {
     return ruleGroup.every((condition) => this.checkRule(condition))
+  }
+
+  private calculateMultiplier(rules: Rule[]): number {
+    const multiplicativeRule = rules.find(
+      (rule) =>
+        rule.multiply &&
+        ["product_quantity", "supplier_quantity", "total_quantity"].includes(
+          rule.type
+        )
+    )
+
+    if (!multiplicativeRule || !multiplicativeRule.quantity) {
+      return 1
+    }
+
+    let actualQuantity: number
+    switch (multiplicativeRule.type) {
+      case "product_quantity":
+        if (!multiplicativeRule.product_id) return 1
+        const product = this.cart.find(
+          (item) => item.id === multiplicativeRule.product_id
+        )
+        actualQuantity = product ? product.quantity : 0
+        break
+
+      case "supplier_quantity":
+        if (!multiplicativeRule.supplier_id) return 1
+        actualQuantity = this.cart
+          .filter((item) => item.supplier_id === multiplicativeRule.supplier_id)
+          .reduce((acc, item) => acc + item.quantity, 0)
+        break
+
+      case "total_quantity":
+        actualQuantity = this.cart.reduce((acc, item) => acc + item.quantity, 0)
+        break
+
+      default:
+        return 1
+    }
+
+    return Math.floor(actualQuantity / multiplicativeRule.quantity)
   }
 
   private checkRule(condition: Rule): boolean {
@@ -96,8 +137,6 @@ export class DiscountEngine<T extends CartItem> {
       0
     )
 
-    /** TODO: Handle multiplication */
-    /** Buy 3 Get 1 = Buy 6 Get 2 = etc.. */
     return this.applyOperator(totalQuantity, operator, requiredQuantity)
   }
 
@@ -135,14 +174,20 @@ export class DiscountEngine<T extends CartItem> {
     }
   }
 
-  private applyAction(action: Action): Action {
+  private applyAction(action: Action, multiplier: number): Action {
     switch (action.type) {
       case "percentage_discount":
         return action
       case "flat_discount":
-        return action
+        return {
+          ...action,
+          value: action.value ? action.value * multiplier : 0,
+        }
       case "free_item":
-        return action
+        return {
+          ...action,
+          quantity: action.quantity ? action.quantity * multiplier : 0,
+        }
     }
   }
 }

@@ -5,6 +5,7 @@ export interface Rule {
   product_id?: string
   supplier_id?: string
   quantity?: number
+  multiply?: boolean
 }
 
 export type RuleOperator = "eq" | "gte" | "lte" | "in" | "gt"
