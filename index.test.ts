@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test"
-import type { CartItem, Discount } from "./index.type"
+import type { CartItem, Discount, Order } from "./index.type"
 import { DiscountEngine } from "."
 
 describe("Buy N Get M Free Discounts", () => {
-  const discounts: Discount[] = [
+  const discounts = [
     {
       id: 1,
       code: "BUY3GET1",
@@ -16,13 +16,13 @@ describe("Buy N Get M Free Discounts", () => {
       ],
       action: { type: "free_item", product_id: "jeans", quantity: 1 },
     },
-  ]
+  ] satisfies Discount[]
 
   test("Success to get 1 if buy 3 items", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 3, price: 50 }],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -33,10 +33,10 @@ describe("Buy N Get M Free Discounts", () => {
   })
 
   test("Fails to get 1 if buy less than 3 items", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 }],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -46,7 +46,7 @@ describe("Buy N Get M Free Discounts", () => {
 })
 
 describe("Buy N Get Discounts", () => {
-  const discounts: Discount[] = [
+  const discounts = [
     {
       id: 1,
       code: "BUY3DISC",
@@ -59,13 +59,13 @@ describe("Buy N Get Discounts", () => {
       ],
       action: { type: "percentage_discount", value: 5 },
     },
-  ]
+  ] satisfies Discount[]
 
   test("Success to get a 5% off if buy 3 items", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 3, price: 50 }],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -74,10 +74,10 @@ describe("Buy N Get Discounts", () => {
   })
 
   test("Fails to get a 5% off if buy less than 3 items", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 2, price: 50 }],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -87,7 +87,7 @@ describe("Buy N Get Discounts", () => {
 })
 
 describe("Supplier-Based Quantity Discounts", () => {
-  const discounts: Discount[] = [
+  const discounts = [
     {
       id: 1,
       code: "BUY10SUPA",
@@ -101,15 +101,15 @@ describe("Supplier-Based Quantity Discounts", () => {
       ],
       action: { type: "percentage_discount", value: 20 },
     },
-  ]
+  ] satisfies Discount[]
 
   test("Success to get a 20% off if buy more than 10 items from supplier A", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [
         { id: "jeans", supplier_id: "supplierA", quantity: 11, price: 50 },
       ],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -118,12 +118,12 @@ describe("Supplier-Based Quantity Discounts", () => {
   })
 
   test("Fails to get a 20% off if buy exact 10 items from supplier A", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [
         { id: "jeans", supplier_id: "supplierA", quantity: 10, price: 50 },
       ],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -132,10 +132,10 @@ describe("Supplier-Based Quantity Discounts", () => {
   })
 
   test("Fails to get a 20% off if buy less than 10 from supplier A", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 8, price: 50 }],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -144,12 +144,12 @@ describe("Supplier-Based Quantity Discounts", () => {
   })
 
   test("Fails to get a 20% off if buy more than 10 from supplier B", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [
         { id: "jeans", supplier_id: "supplierB", quantity: 11, price: 50 },
       ],
       discounts,
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -160,7 +160,7 @@ describe("Supplier-Based Quantity Discounts", () => {
 
 describe("Combination Discounts", () => {
   test("Success to get a 10 off if buy a product with 4 items", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [{ id: "jeans", supplier_id: "supplierA", quantity: 4, price: 50 }],
       discounts: [
         {
@@ -178,7 +178,7 @@ describe("Combination Discounts", () => {
           action: { type: "flat_discount", value: 5 },
         },
       ],
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)
@@ -187,7 +187,7 @@ describe("Combination Discounts", () => {
   })
 
   test("Success to get a 10 off if buy 2 products with 4 items per product (2 times)", () => {
-    const order: { cart: CartItem[]; discounts: Discount[] } = {
+    const order = {
       cart: [
         { id: "jeans", supplier_id: "supplierA", quantity: 4, price: 50 },
         { id: "shirt", supplier_id: "supplierA", quantity: 4, price: 50 },
@@ -215,7 +215,7 @@ describe("Combination Discounts", () => {
           action: { type: "flat_discount", value: 5 },
         },
       ],
-    }
+    } satisfies Order
 
     const discountEngine = new DiscountEngine(order.cart)
     const discountActs = discountEngine.applyDiscounts(order.discounts)

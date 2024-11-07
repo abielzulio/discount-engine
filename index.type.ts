@@ -39,3 +39,5 @@ export interface CartItem {
   quantity: number
   price: number
 }
+
+export type Order = { cart: CartItem[]; discounts: Discount[] }
